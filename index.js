@@ -31,13 +31,18 @@ newspapers.forEach(newspaper=>{
             const title=cheerioParse(this).text();
             const url=cheerioParse(this).attr('href');
             articles.push({
+                source: newspaper.name,
                 title:title,
-                url:newspaper.base+url,
-                source: newspaper.name
+                url:newspaper.base+url
             });
         })
     })
 });
+
+//articles from predefined set of newspapers
+app.get('/news',(req,res)=>{
+    res.json(articles);
+})
 
 //predefined urls in newspaper array to get news articles
 app.get('/news/:newspaperId',async(req,res)=>{
@@ -58,9 +63,9 @@ app.get('/news/:newspaperId',async(req,res)=>{
                 const title=cheerioParse(this).text();
                 const url=cheerioParse(this).attr('href');
                 specificArticles.push({
+                    source:newspaperId,
                     title:title,
-                    url:newspaperBase+url,
-                    source:newspaperId
+                    url:newspaperBase+url
             })
         })
             res.json(specificArticles);
