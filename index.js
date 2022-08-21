@@ -18,7 +18,7 @@ const newspapers=[{
 const articles=[];
 
 app.get('/',(req,res)=>{
-    res.json('Welcome to NEWS Scrapper Api');
+    res.send('Welcome to NEWS Scrapper Api');
 });
 
 
@@ -40,31 +40,35 @@ newspapers.forEach(newspaper=>{
 });
 
 //predefined urls in newspaper array to get news articles
-app.get('/news/all',(req,res)=>{
-  res.json(articles);
-});
-
-//specific to a newspaper passed as parameter
 app.get('/news/:newspaperId',async(req,res)=>{
-    const newspaperId=req.params.newspaperId;
-    const newspaperAddress=newspapers.filter(newspaper=>newspaper.name===newspaperId)[0].address;
-    const newspaperBase=newspapers.filter(newspaper=>newspaper.name===newspaperId)[0].base;
-    axios.get(newspaperAddress).then(response=>{
-        const html=response.data;
-        const cheerioParse=cheerio.load(html);
-        const specificArticles=[];
-
-        cheerioParse('a:contains("climate")',html).each(function(){
-            const title=cheerioParse(this).text();
-            const url=cheerioParse(this).attr('href');
-            specificArticles.push({
-                title:title,
-                url:newspaperBase+url,
-                source:newspaperId
+   try{
+    console.log("Getting news articles from :",newspapers.filter(newspaper=>newspaper.name===req.params.newspaperId));
+    if(newspapers.filter(newspaper=>newspaper.name===req.params.newspaperId).length===0){
+            return res.json({message:"Invalid newspaper"});
+    }
+        const newspaperId=req.params.newspaperId;
+        const newspaperAddress=newspapers.filter(newspaper=>newspaper.name===newspaperId)[0].address;
+        const newspaperBase=newspapers.filter(newspaper=>newspaper.name===newspaperId)[0].base;
+        axios.get(newspaperAddress).then(response=>{
+            const html=response.data;
+            const cheerioParse=cheerio.load(html);
+            const specificArticles=[];
+    
+            cheerioParse('a:contains("climate")',html).each(function(){
+                const title=cheerioParse(this).text();
+                const url=cheerioParse(this).attr('href');
+                specificArticles.push({
+                    title:title,
+                    url:newspaperBase+url,
+                    source:newspaperId
+            })
         })
-    })
-        res.json(specificArticles);
-    }).catch((error)=>console.log(error));
+            res.json(specificArticles);
+        }).catch((error)=>console.log(error));
+   } catch(error){
+    res.json({error});
+   }
+  
 });
 
 app.listen(PORT,()=>console.log(`Server is running on port ${PORT}`));
