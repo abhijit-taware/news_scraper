@@ -44,7 +44,7 @@ app.get('/news',(req,res)=>{
     res.json(articles);
 })
 
-//predefined urls in newspaper array to get news articles
+//articles from provides source matched with existing set of newspapers
 app.get('/news/:newspaperId',async(req,res)=>{
    try{
     console.log("Getting news articles from :",newspapers.filter(newspaper=>newspaper.name===req.params.newspaperId));
